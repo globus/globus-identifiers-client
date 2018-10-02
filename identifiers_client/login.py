@@ -64,7 +64,7 @@ def do_link_login_flow():
     Prompts the user with a link to authorize the CLI to act on their behalf.
     """
     # get the NativeApp client object
-    native_client = _login_client()
+    native_client = _login_client(config)
 
     # start the Native App Grant flow, prefilling the
     # named grant label on the consent page if we can get a
