@@ -5,13 +5,14 @@ import logging
 
 from identifiers_client.local_server import is_remote_session
 from identifiers_client.identifiers_api import (
-    identifiers_client, IdentifierClientError, IdentifierNotLoggedIn)
+    identifiers_client, IdentifierClientError, IdentifierNotLoggedIn,
+    _identifier_json_props, _namespace_json_props)
 from identifiers_client.config import config
 from identifiers_client.login import (
     LOGGED_IN_RESPONSE, LOGGED_OUT_RESPONSE, check_logged_in,
     do_link_login_flow, do_local_server_login_flow, revoke_tokens)
 from identifiers_client.helpers import (subcommand, argument,
-                                        clear_internal_args)
+                                        clear_internal_args, json_parse_args)
 from argparse import ArgumentParser
 
 log = logging.getLogger(__name__)
@@ -142,7 +143,8 @@ def namespace_create(args):
     # This means all members will be admins.
     if 'creators' not in args:
         args['creators'] = args['admins']
-    return client.create_namespace(**args)
+    kwargs = json_parse_args(args, _namespace_json_props)
+    return client.create_namespace(**kwargs)
 
 
 @subcommand([
@@ -185,8 +187,8 @@ def namespace_update(args):
     if 'creators' not in args:
         args['creators'] = args['admins']
     namespace_id = args.pop('namespace_id')
-
-    return client.update_namespace(namespace_id, **args)
+    kwargs = json_parse_args(args, _namespace_json_props)
+    return client.update_namespace(namespace_id, **kwargs)
 
 
 @subcommand([
@@ -252,7 +254,8 @@ def identifier_create(args):
     """
     client = identifiers_client(config)
     args = clear_internal_args(vars(args))
-    return client.create_identifier(**args)
+    kwargs = json_parse_args(args, _identifier_json_props)
+    return client.create_identifier(**kwargs)
 
 
 @subcommand([
@@ -281,8 +284,8 @@ def identifier_update(args):
     client = identifiers_client(config)
     identifier_id = args.identifier
     args = clear_internal_args(vars(args))
-
-    return client.update_identifier(identifier_id, **args)
+    kwargs = json_parse_args(args, _identifier_json_props)
+    return client.update_identifier(identifier_id, **kwargs)
 
 
 @subcommand([

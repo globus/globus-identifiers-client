@@ -1,3 +1,4 @@
+import json
 # Pattern (and code) taken from:
 # https://gist.github.com/mivade/384c2c41c3a29c637cb6c603d4197f9f
 
@@ -37,3 +38,17 @@ def clear_internal_args(args):
         except KeyError:
             pass  # Its ok if the key is not in the list to be cleared
     return args
+
+
+def json_parse_args(in_dict, key_names):
+    for key_name in key_names:
+        val = in_dict.pop(key_name, None)
+        if val is not None:
+            try:
+                val = json.loads(val)
+            except ValueError:
+                raise ValueError(
+                    'value for {}: {} is not encoded in JSON'.format(
+                        key_name, val))
+            in_dict[key_name] = val
+    return in_dict

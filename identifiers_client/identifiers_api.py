@@ -1,5 +1,3 @@
-import json
-
 from globus_sdk import (AccessTokenAuthorizer, ClientCredentialsAuthorizer,
                         RefreshTokenAuthorizer, NativeAppAuthClient)
 from globus_sdk.base import BaseClient, safe_stringify
@@ -73,20 +71,6 @@ def _split_dict(in_dict, key_names):
     return in_dict, new_dict
 
 
-def _json_parse_args(in_dict, key_names):
-    for key_name in key_names:
-        val = in_dict.pop(key_name, None)
-        if val is not None:
-            try:
-                val = json.loads(val)
-            except ValueError:
-                raise ValueError(
-                    'value for {}: {} is not encoded in JSON'.format(
-                        key_name, val))
-            in_dict[key_name] = val
-    return in_dict
-
-
 class IdentifierClient(BaseClient):
     allowed_authorizer_types = (AccessTokenAuthorizer, RefreshTokenAuthorizer,
                                 ClientCredentialsAuthorizer)
@@ -116,7 +100,6 @@ class IdentifierClient(BaseClient):
                       "minting identfiers in JSON format
 
         """
-        kwargs = _json_parse_args(kwargs, _namespace_json_props)
         kwargs, body = _split_dict(kwargs, _namespace_properties)
         self.logger.info("IdentifierClient.create_namespace({}, ...)".format(
             body.get('display_name')))
@@ -147,7 +130,6 @@ class IdentifierClient(BaseClient):
           identfiers in JSON format
 
         """
-        kwargs = _json_parse_args(kwargs, _namespace_json_props)
         kwargs, body = _split_dict(kwargs, _namespace_properties)
         self.logger.info(
             "IdentifierClient.update_namespace({}, ...)".format(namespace_id))
@@ -202,7 +184,6 @@ class IdentifierClient(BaseClient):
           Additional metadata associated with the identifier
 
         """
-        kwargs = _json_parse_args(kwargs, _identifier_json_props)
         kwargs, body = _split_dict(kwargs, _identifier_properties)
         self.logger.info('IdentifierClient.create_identifier({}, ...)'.format(
             body.get('namespace_id')))
@@ -244,7 +225,6 @@ class IdentifierClient(BaseClient):
           Additional metadata associated with the identifier
 
         """
-        kwargs = _json_parse_args(kwargs, _identifier_json_props)
         kwargs, body = _split_dict(kwargs, _identifier_properties)
         self.logger.info('IdentifierClient.update_identifier({}, ...)'.format(
             body.get('identifier_id')))
