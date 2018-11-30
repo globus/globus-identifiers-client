@@ -64,14 +64,16 @@ def do_link_login_flow():
     Prompts the user with a link to authorize the CLI to act on their behalf.
     """
     # get the NativeApp client object
-    native_client = _login_client()
+    native_client = _login_client(config)
 
     # start the Native App Grant flow, prefilling the
     # named grant label on the consent page if we can get a
     # hostname for the local system
     label = platform.node() or None
     native_client.oauth2_start_flow(
-        refresh_tokens=True, prefill_named_grant=label)
+        requested_scopes=config.get('client', 'scope'),
+        refresh_tokens=True,
+        prefill_named_grant=label)
 
     # prompt
     linkprompt = 'Please log into Globus here'
@@ -81,7 +83,7 @@ def do_link_login_flow():
                     native_client.oauth2_get_authorize_url()))
 
     # come back with auth code
-    prompt = 'Enter the resulting Authorization Code here'
+    prompt = 'Enter the resulting Authorization Code here: '
     auth_code = input(prompt).strip()
 
     # finish login flow
