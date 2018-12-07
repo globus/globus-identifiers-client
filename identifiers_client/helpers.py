@@ -1,6 +1,7 @@
 import json
 # Pattern (and code) taken from:
 # https://gist.github.com/mivade/384c2c41c3a29c637cb6c603d4197f9f
+FILE_SPECIFIER = 'file://'
 
 
 def argument(*name_or_flags, **kwargs):
@@ -11,7 +12,6 @@ def argument(*name_or_flags, **kwargs):
     for arg in name_or_flags:
         args.append(arg)
     return args, kwargs
-    # return ([*name_or_flags], kwargs) # <-- tuple, set, and list unpacking requires Python 3.5 or greater
 
 
 def subcommand(args, parent, **kwargs):
@@ -40,15 +40,42 @@ def clear_internal_args(args):
     return args
 
 
-def json_parse_args(in_dict, key_names):
-    for key_name in key_names:
-        val = in_dict.pop(key_name, None)
-        if val is not None:
-            try:
-                val = json.loads(val)
-            except ValueError:
-                raise ValueError(
-                    'value for {}: {} is not encoded in JSON'.format(
-                        key_name, val))
-            in_dict[key_name] = val
-    return in_dict
+def load_metadata(argument):
+    metadata = {}
+    if argument.startswith(FILE_SPECIFIER):
+        fname = argument.replace(FILE_SPECIFIER, '')
+        with open(fname) as f:
+            metadata = json.loads(f.read())
+    else:
+        metadata = json.loads(argument)
+    return metadata
+
+
+def set_checksum_args(arguments):
+    """
+    Argparse parses checksums as {'checksum_sha256': '<sha256_hash>'}
+
+    Return a list of these arguments in a format the Identifiers Service
+    understands:
+
+    "checksums": [
+      {
+        "function": "md5",
+        "value": "fobarbas"
+      },
+      {
+        "function": "sha256",
+        "value": "foobarbaz"
+      }
+    ],
+
+    Note: This modifies the values in 'arguments'
+    """
+    checksum_args = [{'function': arg_name.replace('checksum_', ''),
+                     'value': arguments.pop(arg_name)}
+                     for arg_name in list(arguments.keys())
+                     if arg_name.startswith('checksum')
+                     and arguments[arg_name] is not None]
+    if checksum_args:
+        arguments['checksums'] = checksum_args
+    return arguments
