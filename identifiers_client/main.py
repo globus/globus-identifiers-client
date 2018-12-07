@@ -25,7 +25,23 @@ _namespace_skin_props = [
     'page_title', 'favicon_url', 'preamble_text'
 ]
 
-SUPPORTED_CHECKSUMS = ['md5', 'sha256']
+SUPPORTED_CHECKSUMS = (
+    'dsa',
+    'dsa-sha',
+    'dsaencryption',
+    'dsawithsha',
+    'ecdsa-with-sha1',
+    'md4',
+    'md5',
+    'ripemd160',
+    'sha',
+    'sha1',
+    'sha224',
+    'sha256',
+    'sha384',
+    'sha512',
+    'whirlpool'
+)
 CHECKSUM_HELP = 'Checksum of the identifiers content with the {} algorithm'
 
 checksum_arguments = [argument('--checksum-{}'.format(alg),
