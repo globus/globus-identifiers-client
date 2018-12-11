@@ -74,8 +74,8 @@ def set_checksum_args(arguments):
     checksum_args = [
         {'function': arg_name.replace('checksum_', '').replace('_', '-'),
          'value': arguments.pop(arg_name)}
-         for arg_name in list(arguments.keys())
-         if arg_name.startswith('checksum') and arguments[arg_name] is not None
+        for arg_name in list(arguments.keys())
+        if arg_name.startswith('checksum') and arguments[arg_name] is not None
     ]
     if checksum_args:
         arguments['checksums'] = checksum_args

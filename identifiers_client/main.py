@@ -276,6 +276,8 @@ def identifier_create(args):
     client = identifiers_client(config)
     args = clear_internal_args(vars(args))
     args = set_checksum_args(args)
+    if args.get('locations'):
+        args['location'] = args.pop('locations')
     return client.create_identifier(**args)
 
 
@@ -307,6 +309,8 @@ def identifier_update(args):
     identifier_id = args.identifier
     args = clear_internal_args(vars(args))
     args = set_checksum_args(args)
+    if args.get('locations'):
+        args['location'] = args.pop('locations')
     return client.update_identifier(identifier_id, **args)
 
 

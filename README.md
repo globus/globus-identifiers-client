@@ -17,3 +17,45 @@ A completed build will create an executable file `globus-identifiers-client` in 
 
 ## Use as an SDK
 The SDK functionality is encapsulated in the source file `identifiers_client/identifiers_api.py`. The Doc String comments on the various methods of the `IdentifierClient` class describe the parameters to the operations. 
+
+### Examples
+
+```
+from identifiers_client.identifiers_api import identifiers_client
+from identifiers_client.config import config
+# Loads tokens stored from config
+client = identifiers_client(config)
+client.create_identifier(namespace='<my_namespace>', visible_to=['public'])
+
+## Use as a Command Line Client
+
+A client comes with the installation, and can be used with `globus-identifiers-client`
+
+### Examples
+
+Below are example commands
+
+#### Print information on all options for creating identifiers
+```
+$ globus-identifiers-client identifier-create --help
+```
+
+#### Create an Identifier
+
+```
+globus-identifiers-client identifier-create --namespace <my_namespace> --visible-to public
+```
+
+### Update an identifier
+
+#### Add a location
+
+```
+globus-identifiers-client identifier-update --identifier <myidentifier> --locations https://foo.example.com
+```
+
+#### Add many fields
+
+```
+globus-identifiers-client identifier-update --identifier <myidentifier> --locations https://foo.example.com https://example.com/foo --checksum-sha256 sha256checksum --checksum-md5 mymd5checksum --metadata file://foo.json
+```
