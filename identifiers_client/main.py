@@ -5,14 +5,14 @@ import logging
 
 from identifiers_client.local_server import is_remote_session
 from identifiers_client.identifiers_api import (
-    identifiers_client, IdentifierClientError, IdentifierNotLoggedIn,
-    _identifier_json_props, _namespace_json_props)
+    identifiers_client, IdentifierClientError, IdentifierNotLoggedIn)
 from identifiers_client.config import config
 from identifiers_client.login import (
     LOGGED_IN_RESPONSE, LOGGED_OUT_RESPONSE, check_logged_in,
     do_link_login_flow, do_local_server_login_flow, revoke_tokens)
 from identifiers_client.helpers import (subcommand, argument,
-                                        clear_internal_args, json_parse_args)
+                                        clear_internal_args,
+                                        load_metadata, set_checksum_args)
 from argparse import ArgumentParser
 
 log = logging.getLogger(__name__)
@@ -24,6 +24,30 @@ _namespace_skin_props = [
     'header_background', 'header_icon_url', 'header_icon_link', 'header_text',
     'page_title', 'favicon_url', 'preamble_text'
 ]
+
+SUPPORTED_CHECKSUMS = (
+    'dsa',
+    'dsa-sha',
+    'dsaencryption',
+    'dsawithsha',
+    'ecdsa-with-sha1',
+    'md4',
+    'md5',
+    'ripemd160',
+    'sha',
+    'sha1',
+    'sha224',
+    'sha256',
+    'sha384',
+    'sha512',
+    'whirlpool'
+)
+CHECKSUM_HELP = 'Checksum of the identifiers content with the {} algorithm'
+
+checksum_arguments = [argument('--checksum-{}'.format(alg),
+                               help=CHECKSUM_HELP.format(alg)
+                               )
+                      for alg in SUPPORTED_CHECKSUMS]
 
 
 @subcommand(
@@ -143,8 +167,7 @@ def namespace_create(args):
     # This means all members will be admins.
     if 'creators' not in args:
         args['creators'] = args['admins']
-    kwargs = json_parse_args(args, _namespace_json_props)
-    return client.create_namespace(**kwargs)
+    return client.create_namespace(**args)
 
 
 @subcommand([
@@ -187,8 +210,7 @@ def namespace_update(args):
     if 'creators' not in args:
         args['creators'] = args['admins']
     namespace_id = args.pop('namespace_id')
-    kwargs = json_parse_args(args, _namespace_json_props)
-    return client.update_namespace(namespace_id, **kwargs)
+    return client.update_namespace(namespace_id, **args)
 
 
 @subcommand([
@@ -228,25 +250,24 @@ def namespace_delete(args):
         "identifier",
         required=True),
     argument(
-        "--location",
+        "--locations",
+        nargs='+',
         help="A list of URLs from which the data referred to "
         "by the identifier may be retrieved"),
     argument(
-        "--checksums",
-        help='A JSON formatted list of {value, function} '
-        '(e.g. \'[{"value": "<hashval>", "function": "sha256"}]\') '
-        'pairs providing checksum values for the target data'),
-    argument(
         "--visible-to",
         required=True,
-        help='JSON List of users allowed to view the identifier '
-        '(e.g. \'["public"]\')'),
+        nargs='+',
+        help='List of users allowed to view the identifier '
+        '(e.g. "public")'),
     argument(
         "--metadata",
         help='Additional metadata associated with the '
         'identifier in JSON format '
-        '(e.g. \'{"author": "John Doe", "year": 2018}\')')
-],
+        '(e.g. file://foo.json or \'{"author": "John Doe", "year": 2018}\')',
+        type=load_metadata
+    ),
+] + checksum_arguments,
             parent=subparsers)
 def identifier_create(args):
     """
@@ -254,8 +275,10 @@ def identifier_create(args):
     """
     client = identifiers_client(config)
     args = clear_internal_args(vars(args))
-    kwargs = json_parse_args(args, _identifier_json_props)
-    return client.create_identifier(**kwargs)
+    args = set_checksum_args(args)
+    if args.get('locations'):
+        args['location'] = args.pop('locations')
+    return client.create_identifier(**args)
 
 
 @subcommand([
@@ -264,18 +287,19 @@ def identifier_create(args):
         help="The id for the identifier to update",
         required=True),
     argument(
-        "--location",
-        help="A URL from which the data referred to by the "
-        "identifier may be retrieved"),
-    argument(
-        "--checksums",
-        help="A JSON formatted list of {value, function} "
-        "pairs providing checksum values for the target data"),
+        "--locations",
+        nargs='+',
+        help="A list of URLs from which the data referred to "
+             "by the identifier may be retrieved"),
     argument(
         "--metadata",
-        help="Additional metadata associated with the "
-        "identifier in JSON format")
-],
+        help='Additional metadata associated with the '
+             'identifier in JSON format '
+             '(e.g. file://foo.json or '
+             '\'{"author": "John Doe", "year": 2018}\')',
+        type=load_metadata
+        ),
+    ] + checksum_arguments,
             parent=subparsers)
 def identifier_update(args):
     """
@@ -284,8 +308,10 @@ def identifier_update(args):
     client = identifiers_client(config)
     identifier_id = args.identifier
     args = clear_internal_args(vars(args))
-    kwargs = json_parse_args(args, _identifier_json_props)
-    return client.update_identifier(identifier_id, **kwargs)
+    args = set_checksum_args(args)
+    if args.get('locations'):
+        args['location'] = args.pop('locations')
+    return client.update_identifier(identifier_id, **args)
 
 
 @subcommand([
