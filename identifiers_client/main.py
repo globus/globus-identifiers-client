@@ -103,19 +103,22 @@ def logout(args):
         help="description of the new namespace"),
     argument(
         "--creators",
-        required=True,
+        nargs="*",
         help="The Principal URN for a Globus Group who's members "
-        "are permitted to add to this namespace"),
+        "are permitted to add to this namespace. Defaults to the same value as "
+        "admins"),
     argument(
         "--admins",
-        required=True,
-        help="The Principal URN for a Globus Group who's members "
+        nargs='+',
+        help="The Principal URN for a Globus Auth Identity or Globus Group "
+        "who's members "
         "are permitted to perform administrative functions on "
         "this namespace"),
     argument(
         "--identifier-admins",
-        required=True,
-        help="The Principal URN for a Globus Group who's members "
+        nargs='+',
+        help="The Principal URN for a Globus Auth Identity or Globus Group "
+        "who's members "
         "are permitted to administrate identifiers created "
         "in this namespace"),
     argument(
@@ -180,10 +183,12 @@ def namespace_create(args):
     argument("--description", help="The updated description of the namespace"),
     argument(
         "--creators",
+        nargs="*",
         help="The Principal URN for a Globus Group who's members are "
         "permitted to add to this namespace"),
     argument(
         "--admins",
+        nargs="+",
         help="The Principal URN for a Globus Group who's members are "
         "permitted to perform administrative functions on "
         "this namespace"),
