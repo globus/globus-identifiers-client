@@ -191,6 +191,14 @@ class IdentifierClient(BaseClient):
             kwargs['namespace']))
         return self.post(path, body, params=kwargs)
 
+    def get_identifier_from_checksum(self, checksum, function, **params):
+        check, func = safe_stringify(checksum), safe_stringify(function)
+        self.logger.info('IdentifierClient.get_checksum({}, {})'.format(
+            check, func))
+        path = self.qjoin_path('/checksum/{}'.format(checksum))
+        params['function'] = func
+        return self.get(path, params=params)
+
     def get_identifier(self, identifier_id, **params):
         """
         ``GET /<identifier_id>

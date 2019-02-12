@@ -332,6 +332,23 @@ def identifier_display(args):
     return client.get_identifier(args.identifier)
 
 
+@subcommand([
+    argument(
+        "--checksum",
+        help="An identifiers checksum",
+        required=True),
+    argument(
+        "--function",
+        help="The corresponding function used to generate the above checksum",
+        required=True
+    )],
+    parent=subparsers
+)
+def identifier_from_checksum(args):
+    client = identifiers_client(config)
+    return client.get_identifier_from_checksum(args.checksum, args.function)
+
+
 def main():
     args = cli.parse_args()
     subcommand = args.subcommand
