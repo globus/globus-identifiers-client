@@ -41,7 +41,6 @@ def identifiers_client(config, **kwargs):
     )
 
     return IdentifierClient(
-        "identifier",
         base_url=base_url,
         app_name=app_name,
         authorizer=authorizer,
@@ -76,6 +75,12 @@ class IdentifierClient(BaseClient):
                                 ClientCredentialsAuthorizer)
 
     error_class = IdentifierClientError
+
+    def __init__(self, authorizer=None, **kwargs):
+        BaseClient.__init__(
+            self, "identifier", base_url="https://identifiers.globus.org/",
+            authorizer=authorizer, **kwargs
+        )
 
     def create_namespace(self, **kwargs):
         """
