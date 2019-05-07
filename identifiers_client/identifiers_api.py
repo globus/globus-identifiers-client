@@ -77,7 +77,7 @@ class IdentifierClient(BaseClient):
     error_class = IdentifierClientError
 
     def __init__(self, authorizer=None, **kwargs):
-        BaseClient.__init__(
+        super().__init__(
             self, "identifier", base_url="https://identifiers.globus.org/",
             authorizer=authorizer, **kwargs
         )
